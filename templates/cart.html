@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Your Cart</h1>
+{% if items %}
+<form method="post" action="{{ url_for('update_cart') }}">
+{% for i in items %}
+<div class="cart-item">
+  <img src="{{ i.image }}" alt="{{ i.name }}">
+  <div><h3>{{ i.name }}</h3><p>₹{{ "%.0f"|format(i.price) }} each</p></div>
+  <input type="number" min="0" name="qty_{{ i.id }}" value="{{ i.qty }}">
+  <strong>₹{{ "%.0f"|format(i.subtotal) }}</strong>
+</div>
+{% endfor %}
+<button class="btn secondary">Update cart</button>
+</form>
+<div class="checkout">
+  <h2>Total: ₹{{ "%.0f"|format(total) }}</h2>
+  <form method="post" action="{{ url_for('checkout') }}">
+    <input name="name" placeholder="Full name" required>
+    <input name="email" type="email" placeholder="Email" required>
+    <textarea name="address" placeholder="Delivery address" required></textarea>
+    <button class="btn">Place order</button>
+  </form>
+</div>
+{% else %}
+<p>Your cart is empty.</p><a class="btn" href="{{ url_for('index') }}">Continue shopping</a>
+{% endif %}
+{% endblock %}

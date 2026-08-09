@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">GCP CLOUD E-COMMERCE PROJECT</p>
+    <h1>Shop simple.<br>Deploy globally.</h1>
+    <p>A production-style starter application built with Python Flask, Firestore and Cloud Run.</p>
+  </div>
+</section>
+<h2>{% if query %}Search results for "{{ query }}"{% else %}Featured products{% endif %}</h2>
+<div class="grid">
+{% for p in products %}
+<article class="card">
+  <img src="{{ p.image }}" alt="{{ p.name }}">
+  <div class="card-body">
+    <span class="tag">{{ p.category }}</span>
+    <h3>{{ p.name }}</h3>
+    <p>{{ p.description }}</p>
+    <div class="row"><strong>₹{{ "%.0f"|format(p.price) }}</strong><a class="btn secondary" href="{{ url_for('product', product_id=p.id) }}">View</a></div>
+  </div>
+</article>
+{% endfor %}
+</div>
+{% endblock %}
