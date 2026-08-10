@@ -131,3 +131,8 @@ CloudCart is automatically tested, containerized, and deployed
 to Google Cloud Run using Cloud Build.
 ## CI/CD Pipeline
 Automated deployment through GitHub and Cloud Build.
+
+## CI/CD
+
+CloudCart is automatically tested, containerized, and deployed
+to Google Cloud Run using GitHub and Cloud Build.
