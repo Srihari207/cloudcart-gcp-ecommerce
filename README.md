@@ -129,3 +129,5 @@ Google Cloud pricing changes. Cloud Run and several other GCP services have free
 
 CloudCart is automatically tested, containerized, and deployed
 to Google Cloud Run using Cloud Build.
+## CI/CD Pipeline
+Automated deployment through GitHub and Cloud Build.
