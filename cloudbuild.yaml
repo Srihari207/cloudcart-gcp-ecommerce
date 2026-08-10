@@ -1,5 +1,5 @@
 steps:
-  # 1. Install dependencies and run tests
+  # 1. Run automated tests
   - name: 'python:3.12-slim'
     entrypoint: 'bash'
     args:
@@ -13,14 +13,14 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'asia-south1-docker.pkg.dev/$PROJECT_ID/cloudcart-repo/cloudcart:$COMMIT_SHA'
+      - 'asia-south1-docker.pkg.dev/$PROJECT_ID/cloudcart-repo/cloudcart:$BUILD_ID'
       - '.'
 
   # 3. Push Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'asia-south1-docker.pkg.dev/$PROJECT_ID/cloudcart-repo/cloudcart:$COMMIT_SHA'
+      - 'asia-south1-docker.pkg.dev/$PROJECT_ID/cloudcart-repo/cloudcart:$BUILD_ID'
 
   # 4. Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -29,7 +29,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'cloudcart'
-      - '--image=asia-south1-docker.pkg.dev/$PROJECT_ID/cloudcart-repo/cloudcart:$COMMIT_SHA'
+      - '--image=asia-south1-docker.pkg.dev/$PROJECT_ID/cloudcart-repo/cloudcart:$BUILD_ID'
       - '--region=asia-south1'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -38,7 +38,7 @@ steps:
       - '--min=0'
 
 images:
-  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/cloudcart-repo/cloudcart:$COMMIT_SHA'
+  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/cloudcart-repo/cloudcart:$BUILD_ID'
 
 options:
   logging: CLOUD_LOGGING_ONLY
