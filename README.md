@@ -124,3 +124,8 @@ This starter is intentionally focused on learning and deployment. For a producti
 ## Cost note
 
 Google Cloud pricing changes. Cloud Run and several other GCP services have free tiers/quotas, but usage outside applicable free allowances can incur charges. Set a billing budget alert before experimenting.
+
+## CI/CD
+
+CloudCart is automatically tested, containerized, and deployed
+to Google Cloud Run using Cloud Build.
