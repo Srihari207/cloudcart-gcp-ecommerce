@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="order-details-page">
+
+    <div class="order-details-header">
+
+        <div>
+            <h1>Order #{{ order["order_id"] }}</h1>
+
+            {% if order.get("created_at") %}
+                <p>
+                    Ordered on:
+                    {{ order["created_at"].strftime("%d %b %Y, %I:%M %p") }}
+                </p>
+            {% endif %}
+        </div>
+
+    <div class="order-status-timeline">
+
+    <div class="status-step active">
+        <div class="status-circle">1</div>
+        <span>Placed</span>
+    </div>
+
+    <div class="status-line"></div>
+
+    <div class="status-step
+        {% if order.get('status') in ['Processing', 'Shipped', 'Delivered'] %}
+            active
+        {% endif %}">
+        <div class="status-circle">2</div>
+        <span>Processing</span>
+    </div>
+
+    <div class="status-line"></div>
+
+    <div class="status-step
+        {% if order.get('status') in ['Shipped', 'Delivered'] %}
+            active
+        {% endif %}">
+        <div class="status-circle">3</div>
+        <span>Shipped</span>
+    </div>
+
+    <div class="status-line"></div>
+
+    <div class="status-step
+        {% if order.get('status') == 'Delivered' %}
+            active
+        {% endif %}">
+        <div class="status-circle">4</div>
+        <span>Delivered</span>
+    </div>
+
+    </div>
+
+
+        <div class="order-status-large">
+            {{ order.get("status", "Placed") }}
+        </div>
+
+    </div>
+
+
+    <div class="order-details-card">
+
+        <h2>Items</h2>
+
+        {% for item in order["items"] %}
+
+            <div class="details-item">
+
+                <div>
+                    <strong>{{ item["name"] }}</strong>
+
+                    <p>
+                        Product ID:
+                        {{ item["product_id"] }}
+                    </p>
+                </div>
+
+                <div>
+                    Qty: {{ item["qty"] }}
+                </div>
+
+                <div>
+                    ₹{{ "%.0f"|format(item["price"]) }}
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+
+        <div class="details-total">
+
+            <span>Total</span>
+
+            <strong>
+                ₹{{ "%.0f"|format(order["total"]) }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="order-details-card">
+
+        <h2>Customer Information</h2>
+
+        <p>
+            <strong>Name:</strong>
+            {{ order["customer_name"] }}
+        </p>
+
+        <p>
+            <strong>Email:</strong>
+            {{ order["user_email"] }}
+        </p>
+
+        <p>
+            <strong>Delivery Address:</strong>
+            {{ order["address"] }}
+        </p>
+
+    </div>
+
+
+    <a
+        class="btn secondary"
+        href="{{ url_for('my_orders') }}">
+        ← Back to My Orders
+    </a>
+
+</div>
+
+{% endblock %}

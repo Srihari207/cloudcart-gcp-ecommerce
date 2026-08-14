@@ -1,7 +1,10 @@
+import firebase_admin
+from firebase_admin import auth
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from google.cloud import firestore
 
+firebase_admin.initialize_app()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
@@ -44,6 +47,7 @@ def cart_items():
     cart = session.get("cart", {})
     result = []
     total = 0
+    
     for pid, qty in cart.items():
         product = get_product(pid)
         if product:
@@ -52,9 +56,61 @@ def cart_items():
             total += subtotal
     return result, total
 
+def verify_firebase_token():
+    """Verify the Firebase ID token from the Authorization header."""
+
+    auth_header = request.headers.get("Authorization", "")
+
+    if not auth_header.startswith("Bearer "):
+        return None
+
+    id_token = auth_header.split("Bearer ", 1)[1].strip()
+
+    if not id_token:
+        return None
+
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        return decoded_token
+
+    except Exception as e:
+        app.logger.warning("Firebase token verification failed: %s", e)
+        return None
+
+@app.post("/api/auth/verify")
+def verify_auth():
+    user = verify_firebase_token()
+
+    if not user:
+        return {
+            "authenticated": False,
+            "message": "Invalid or missing authentication token"
+        }, 401
+
+    return {
+        "authenticated": True,
+        "uid": user.get("uid"),
+        "email": user.get("email")
+    }
+
+    
 @app.context_processor
 def inject_cart():
     return {"cart_count": sum(session.get("cart", {}).values())}
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+
+@app.route("/logout")
+def logout():
+    return redirect(url_for("index"))
 
 @app.route("/")
 def index():
@@ -103,7 +159,15 @@ def update_cart():
 
 @app.post("/checkout")
 def checkout():
+    # Verify Firebase authentication
+    user = verify_firebase_token()
+
+    if not user:
+        flash("Please login before placing an order.")
+        return redirect(url_for("login"))
+
     items, total = cart_items()
+
     if not items:
         flash("Your cart is empty.")
         return redirect(url_for("index"))
@@ -111,27 +175,117 @@ def checkout():
     customer_name = request.form.get("name", "").strip()
     email = request.form.get("email", "").strip()
     address = request.form.get("address", "").strip()
+
     if not customer_name or not email or not address:
         flash("Please complete all checkout fields.")
         return redirect(url_for("cart"))
+
+    # Use the authenticated Firebase identity
+    user_id = user.get("uid")
+    user_email = user.get("email")
 
     order = {
         "customer_name": customer_name,
         "email": email,
         "address": address,
-        "items": [{"product_id": i["id"], "name": i["name"], "qty": i["qty"], "price": i["price"]} for i in items],
+
+        # Firebase identity
+        "user_id": user_id,
+        "user_email": user_email,
+
+        "items": [
+            {
+                "product_id": i["id"],
+                "name": i["name"],
+                "qty": i["qty"],
+                "price": i["price"]
+            }
+            for i in items
+        ],
+
         "total": total,
+
+        # Order status and timestamp
+        "status": "Placed",
+        "created_at": firestore.SERVER_TIMESTAMP,
     }
 
     if db:
         ref = db.collection("orders").document()
+
         order["order_id"] = ref.id
+
         ref.set(order)
+
     else:
         order["order_id"] = "LOCAL-DEMO"
 
     session["cart"] = {}
+
     return render_template("success.html", order=order)
+
+
+@app.get("/my-orders")
+def my_orders():
+    # Verify Firebase authentication
+    user = verify_firebase_token()
+
+    if not user:
+        return "Authentication required", 401
+
+    user_id = user.get("uid")
+
+    if not user_id:
+        return "Invalid user", 401
+
+    orders = []
+
+    if db:
+        orders_ref = (
+            db.collection("orders")
+            .where("user_id", "==", user_id)
+            .stream()
+        )
+
+        for doc in orders_ref:
+            order = doc.to_dict()
+            order["order_id"] = doc.id
+            orders.append(order)
+
+    return render_template(
+        "my_orders.html",
+        orders=orders
+    )
+
+@app.get("/my-orders/<order_id>")
+def order_details(order_id):
+    user = verify_firebase_token()
+
+    if not user:
+        return "Authentication required", 401
+
+    user_id = user.get("uid")
+
+    if not db:
+        return "Order details unavailable", 404
+
+    doc = db.collection("orders").document(order_id).get()
+
+    if not doc.exists:
+        return "Order not found", 404
+
+    order = doc.to_dict()
+
+    # Security check
+    if order.get("user_id") != user_id:
+        return "Order not found", 404
+
+    order["order_id"] = doc.id
+
+    return render_template(
+        "order_details.html",
+        order=order
+    )
 
 @app.get("/health")
 def health():

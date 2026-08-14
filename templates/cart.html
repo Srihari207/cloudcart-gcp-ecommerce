@@ -15,12 +15,35 @@
 </form>
 <div class="checkout">
   <h2>Total: ₹{{ "%.0f"|format(total) }}</h2>
-  <form method="post" action="{{ url_for('checkout') }}">
-    <input name="name" placeholder="Full name" required>
-    <input name="email" type="email" placeholder="Email" required>
-    <textarea name="address" placeholder="Delivery address" required></textarea>
-    <button class="btn">Place order</button>
+
+  <form id="checkout-form">
+    <input
+      name="name"
+      placeholder="Full name"
+      required
+    >
+
+    <input
+      name="email"
+      type="email"
+      placeholder="Email"
+      required
+    >
+
+    <textarea
+      name="address"
+      placeholder="Delivery address"
+      required
+    ></textarea>
+
+    <button
+      type="submit"
+      class="btn">
+      Place order
+    </button>
   </form>
+
+  <p id="checkout-message"></p>
 </div>
 {% else %}
 <p>Your cart is empty.</p><a class="btn" href="{{ url_for('index') }}">Continue shopping</a>

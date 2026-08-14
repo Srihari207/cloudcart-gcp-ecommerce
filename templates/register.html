@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-container">
+
+    <div class="auth-card">
+
+        <h1>Create Account</h1>
+
+        <p class="auth-subtitle">
+            Join CloudCart today
+        </p>
+
+
+        <form onsubmit="event.preventDefault(); registerUser();">
+
+            <div class="form-group">
+
+                <label for="register-email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="register-email"
+                    placeholder="Enter your email"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="register-password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="register-password"
+                    placeholder="Create a password"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="register-confirm-password">
+                    Confirm Password
+                </label>
+
+                <input
+                    type="password"
+                    id="register-confirm-password"
+                    placeholder="Confirm your password"
+                    required
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="auth-button">
+                Create Account
+            </button>
+
+        </form>
+
+
+        <p
+            id="auth-message"
+            class="auth-message">
+        </p>
+
+
+        <p class="auth-switch">
+
+            Already have an account?
+
+            <a href="{{ url_for('login') }}">
+                Login
+            </a>
+
+        </p>
+
+    </div>
+
+</div>
+
+
+<script
+    type="module"
+    src="{{ url_for('static', filename='auth.js') }}">
+</script>
+
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="orders-container">
+
+    <h1>My Orders</h1>
+
+    {% if orders %}
+
+        <div class="orders-list">
+
+            {% for order in orders %}
+
+                <div class="order-card">
+
+                    <div class="order-header">
+
+                        <div class="order-header">
+
+    <div>
+
+        <h2>
+            Order #{{ order["order_id"] }}
+        </h2>
+
+        <a
+            href="{{ url_for('order_details', order_id=order['order_id']) }}"
+            class="order-details-link"
+            onclick="return loadOrderDetails(event, this.href);">
+            View Order Details →
+        </a>
+
+
+        {% if order.get("user_email") %}
+            <p>
+                {{ order["user_email"] }}
+            </p>
+        {% endif %}
+
+        <p class="order-status">
+            <strong>Status:</strong>
+
+            {{ order.get("status", "Placed") }}
+        </p>
+
+        {% if order.get("created_at") %}
+
+            <p class="order-date">
+                <strong>Ordered:</strong>
+
+                {{ order["created_at"].strftime("%d %b %Y, %I:%M %p") }}
+
+            </p>
+
+        {% endif %}
+
+    </div>
+
+    <strong class="order-total">
+        ₹{{ "%.0f"|format(order["total"]) }}
+    </strong>
+
+</div>
+
+                    <div class="order-items">
+
+                        <h3>Items</h3>
+
+                        {% for item in order["items"] %}
+
+                            <div class="order-item">
+
+                                <span>
+                                    {{ item["name"] }}
+                                </span>
+
+                                <span>
+                                    Qty: {{ item["qty"] }}
+                                </span>
+
+                                <span>
+                                    ₹{{ "%.0f"|format(item["price"]) }}
+                                </span>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="order-details">
+
+                        <p>
+                            <strong>Customer:</strong>
+                            {{ order["customer_name"] }}
+                        </p>
+
+                        <p>
+                            <strong>Delivery Address:</strong>
+                            {{ order["address"] }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-orders">
+
+            <h2>No orders yet</h2>
+
+            <p>
+                You haven't placed any orders yet.
+            </p>
+
+            <a
+                class="btn"
+                href="{{ url_for('index') }}">
+                Start Shopping
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
